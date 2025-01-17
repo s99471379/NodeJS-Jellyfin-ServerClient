@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>多影片上传</title>
+<style>
+    .progress-bar {
+        width: 0%;
+        height: 20px;
+        background-color: #4CAF50;
+        text-align: center;
+        color: white;
+        line-height: 20px;
+    }
+</style>
+</head>
+<body>
+<form id="uploadForm" enctype="multipart/form-data">
+    <div id="fileInputContainer"></div>
+    <button type="button" onclick="addFileInput()">新增檔案</button>
+    <button type="button" onclick="submitForm()">上傳影片</button>
+</form>
+
+<script>
+let fileId = 0;
+function addFileInput() {
+    fileId++;
+    const container = document.getElementById('fileInputContainer');
+    const newFileInput = document.createElement('div');
+    newFileInput.className = 'fileInput';
+    newFileInput.innerHTML = `
+        <input type="text" name="courseId_${fileId}" placeholder="課程編號" required>
+        <input type="text" name="chapterId_${fileId}" placeholder="章節編號" required>
+        <input type="text" name="sectionId_${fileId}" placeholder="節編號" required>
+        <input type="file" name="videos_${fileId}" required>
+        <div class="progress-bar" id="progress_${fileId}">0%</div>
+    `;
+    container.appendChild(newFileInput);
+}
+
+function submitForm() {
+    const formData = new FormData(document.getElementById('uploadForm'));
+    const xhr = new XMLHttpRequest();
+    
+    xhr.open('POST', 'http://localhost:3000/upload', true);
+
+    xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+            const percentage = Math.round((event.loaded / event.total) * 100);
+            // 更新所有進度條
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                bar.style.width = percentage + '%';
+                bar.textContent = percentage + '%';
+            });
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            alert('上傳成功');
+        } else {
+            alert('上傳失敗');
+        }
+    };
+
+    xhr.onerror = function() {
+        alert('上傳過程中出現錯誤');
+    };
+
+    xhr.send(formData);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Video from Jellyfin</title>
+</head>
+<body>
+    <button id="downloadBtn">Download Video</button>
+
+    <script>
+        document.getElementById('downloadBtn').addEventListener('click', function () {
+            const JELLYFIN_URL = 'http://localhost:8096';
+            const API_TOKEN = 'xxx';
+            const ITEM_ID = 'xxx'; // 影片的ID
+
+            // 建立下載 URL
+            const downloadUrl = `${JELLYFIN_URL}/Videos/${ITEM_ID}/stream?Static=true&api_key=${API_TOKEN}`;
+
+            // 使用 fetch 進行下載
+            fetch(downloadUrl, {
+                headers: {
+                    'X-Emby-Token': API_TOKEN
+                }
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'video.mp4'; // 可以根據需要更改文件名
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(err => console.error('下載失敗:', err));
+        });
+    </script>
+</body>
+</html>

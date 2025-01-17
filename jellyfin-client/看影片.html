@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Video Streaming</title>
+<style>
+  video::-webkit-media-controls-enclosure {
+      overflow:hidden;
+  }
+  video::-webkit-media-controls-panel {
+      width: calc(100% + 30px);
+  }
+</style>
+</head>
+<body>
+<video id="videoPlayer" controls width="640" height="360" oncontextmenu="return false;" controlsList="nodownload"></video>
+<div id="videoList"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    fetchVideos();
+});
+
+function fetchVideos() {
+  fetch('http://localhost:3000/videos')
+  .then(response => response.json())
+  .then(videos => {
+    const videoList = document.getElementById('videoList');
+    videos.forEach(video => {
+      const button = document.createElement('button');
+      button.innerText = video.name;
+      button.onclick = function() { loadVideo(video.name); };
+      videoList.appendChild(button);
+    });
+  })
+  .catch(error => console.error('Error loading the videos:', error));
+}
+
+function loadVideo(videoName) {
+  fetch('http://localhost:3000/video', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name: videoName })
+  })
+  .then(response => response.blob())
+  .then(blob => {
+    const videoURL = URL.createObjectURL(blob);
+    const videoPlayer = document.getElementById('videoPlayer');
+    videoPlayer.src = videoURL;
+  })
+  .catch(error => console.error('Error loading the video:', error));
+}
+</script>
+</body>
+</html>
